@@ -1,0 +1,14 @@
+{
+  "name": "mltshp-api-test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "netlify-lambda build src/lambda"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "encoding": "^0.1.12",
+    "netlify-lambda": "^1.6.3",
+    "node-fetch": "^2.6.0"
+  }
+}
