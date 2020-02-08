@@ -43,15 +43,12 @@ const getToken = () => {
     client_secret: API_SECRET
   };
 
-  // const headers = {
-  //   "Content-Type": "application/x-www-form-urlencoded"
-  // };
-  // const data = `client_id=${API_KEY}&client_secret=${API_SECRET}&code=${authCode}&redirect_uri=${REDIRECT_URL}`;
-
   return fetch(ACCESS_TOKEN_URL, {
     method: "POST",
-    // headers: headers,
-    body: data
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(data)
   }).then(response => response.json());
 };
 
