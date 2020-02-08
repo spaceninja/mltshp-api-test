@@ -55,7 +55,7 @@ exports.handler = async (event, context) => {
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded"
   };
-  const body = `grant_type="authorization_code"&client_id=${params.client_id}&client_secret=${params.client_secret}&code=${params.code}&redirect_uri=${params.redirect_uri}`;
+  const body = `grant_type=authorization_code&client_id=${params.client_id}&client_secret=${params.client_secret}&code=${params.code}&redirect_uri=${params.redirect_uri}`;
   console.log("BODY", body);
 
   // Request an access token from the oAuth API
