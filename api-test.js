@@ -18,7 +18,9 @@ const REDIRECT_URL = "http://localhost/mltshp-php-sample.php";
 
 // Other API URLs
 const AUTHENTICATION_URL = `https://mltshp.com/api/authorize?response_type=code&client_id=${API_KEY}`;
-const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
+// const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
+const ACCESS_TOKEN_URL =
+  "https://mltshp-api-test.netlify.com/.netlify/functions/mltshp-oauth-api-proxy";
 
 // Salt for your nonce
 const NONCE_SALT = "Something unique or random.";
@@ -35,20 +37,27 @@ const appElement = document.getElementById("app");
 let content = "";
 
 const getToken = () => {
-  const data = {
-    grant_type: "authorization_code",
-    code: authCode,
-    redirect_uri: REDIRECT_URL,
-    client_id: API_KEY,
-    client_secret: API_SECRET
+  // const data = {
+  //   grant_type: "authorization_code",
+  //   code: authCode,
+  //   redirect_uri: REDIRECT_URL,
+  //   client_id: API_KEY,
+  //   client_secret: API_SECRET
+  // };
+
+  // const headers = {
+  //   "content-type": "application/json"
+  // };
+
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded"
   };
+  const data = `client_id=${API_KEY}&client_secret=${API_SECRET}&code=${authCode}&redirect_uri=${REDIRECT_URL}`;
 
   return fetch(ACCESS_TOKEN_URL, {
     method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify(data)
+    headers: headers,
+    body: data
   }).then(response => response.json());
 };
 
