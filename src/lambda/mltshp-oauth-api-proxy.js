@@ -50,15 +50,21 @@ exports.handler = async (event, context) => {
     body: body
   })
     .then(response => response.json())
-    .then(json => ({
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      },
-      body: JSON.stringify(json)
-    }))
-    .catch(error => ({
-      statusCode: 422,
-      body: `Oops! Something went wrong. ${error}`
-    }));
+    .then(json => {
+      console.log("RESPONSE", json);
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify(json)
+      };
+    })
+    .catch(error => {
+      console.log("ERROR", error);
+      return {
+        statusCode: 422,
+        body: `Oops! Something went wrong. ${error}`
+      };
+    });
 };
