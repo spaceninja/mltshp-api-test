@@ -40,6 +40,7 @@ exports.handler = async (event, context) => {
     redirect_uri: params.redirect_uri
   };
   const jsonBody = JSON.stringify(body);
+  console.log("BODY", body, jsonBody);
 
   // Request an access token from the oAuth API
   return fetch(mltshpOAuthApiUrl, {
@@ -50,7 +51,7 @@ exports.handler = async (event, context) => {
     body: jsonBody
   })
     .then(response => {
-      console.log(response);
+      console.log("RESPONSE", response.json());
       return response.json();
     })
     .then(json => ({
