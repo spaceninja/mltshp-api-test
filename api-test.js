@@ -58,7 +58,12 @@ const getToken = () => {
     method: "POST",
     headers: headers,
     body: data
-  }).then(response => response.json());
+  })
+    .then(response => response.json())
+    .catch(error => ({
+      statusCode: 422,
+      body: `Oops! Something went wrong. ${error}`
+    }));
 };
 
 const init = async () => {
