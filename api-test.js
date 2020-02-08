@@ -9,18 +9,16 @@
  */
 
 // Your app's API key & secret
-const API_KEY = "KEY";
-const API_SECRET = "SECRET";
+const API_KEY = "YOUR_API_KEY";
+const API_SECRET = "YOUR_API_SECRET";
 
 // Redirect URL MLTSHP will send auth code to.
 // Same one you provided when you set up your app.
-const REDIRECT_URL = "http://localhost/mltshp-php-sample.php";
+const REDIRECT_URL = "https://example.com/api-test";
 
 // Other API URLs
 const AUTHENTICATION_URL = `https://mltshp.com/api/authorize?response_type=code&client_id=${API_KEY}`;
-// const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
-const ACCESS_TOKEN_URL =
-  "https://mltshp-api-test.netlify.com/.netlify/functions/mltshp-oauth-api-proxy";
+const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
 
 // Salt for your nonce
 const NONCE_SALT = "Something unique or random.";
@@ -36,28 +34,17 @@ const authCode = urlParams.get("code");
 const appElement = document.getElementById("app");
 let content = "";
 
-const getToken = () => {
-  // const data = {
-  //   grant_type: "authorization_code",
-  //   code: authCode,
-  //   redirect_uri: REDIRECT_URL,
-  //   client_id: API_KEY,
-  //   client_secret: API_SECRET
-  // };
-
-  // const headers = {
-  //   "content-type": "application/json"
-  // };
-
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded"
-  };
-  const data = `client_id=${API_KEY}&client_secret=${API_SECRET}&code=${authCode}&redirect_uri=${REDIRECT_URL}`;
-
+/**
+ * Get API Token
+ * @param {string} code
+ */
+const getToken = code => {
   return fetch(ACCESS_TOKEN_URL, {
     method: "POST",
-    headers: headers,
-    body: data
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `grant_type=authorization_code&client_id=${API_KEY}&client_secret=${API_SECRET}&code=${code}&redirect_uri=${REDIRECT_URL}`
   })
     .then(response => response.json())
     .catch(error => ({
@@ -67,14 +54,13 @@ const getToken = () => {
 };
 
 const init = async () => {
-  let token = await getToken();
+  let token = await getToken(authCode);
   console.log("TOKEN:", token);
 };
 
 // See if we received an authorization code as a URL parameter
 if (authCode) {
   // Auth code exists. Now we need to get access token.
-  // Assemble and send our JSON formatted request
   init();
 } else {
   // Auth code does not exist. Put info in the html to send them on their way.

@@ -38,48 +38,27 @@ exports.handler = async (event, context) => {
   }
 
   // Construct the body of the request
-
-  // const headers = {
-  //   "content-type": "application/json"
-  // };
-  // const data = {
-  //   grant_type: "authorization_code",
-  //   code: params.code,
-  //   client_id: params.client_id,
-  //   client_secret: params.client_secret,
-  //   redirect_uri: params.redirect_uri
-  // };
-  // const body = JSON.stringify(data);
-  // console.log("BODY", data, body);
-
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded"
-  };
   const body = `grant_type=authorization_code&client_id=${params.client_id}&client_secret=${params.client_secret}&code=${params.code}&redirect_uri=${params.redirect_uri}`;
   console.log("BODY", body);
 
-  // Request an access token from the oAuth API
+  // Request an access token from the OAuth API
   return fetch(mltshpOAuthApiUrl, {
     method: "POST",
-    headers: headers,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
     body: body
   })
     .then(response => response.json())
-    .then(json => {
-      console.log("RESPONSE", json);
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: JSON.stringify(json)
-      };
-    })
-    .catch(error => {
-      console.log("ERROR", error);
-      return {
-        statusCode: 422,
-        body: `Oops! Something went wrong. ${error}`
-      };
-    });
+    .then(json => ({
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify(json)
+    }))
+    .catch(error => ({
+      statusCode: 422,
+      body: `Oops! Something went wrong. ${error}`
+    }));
 };
