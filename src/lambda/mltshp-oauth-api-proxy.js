@@ -11,7 +11,10 @@ const mltshpOAuthApiUrl = "https://mltshp.com/api/token";
 exports.handler = async (event, context) => {
   // Only allow POST
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed"
+    };
   }
 
   // Params are in the event body encoded as a query string
@@ -28,27 +31,38 @@ exports.handler = async (event, context) => {
       params.redirect_uri
     )
   ) {
-    return { statusCode: 401, body: "API Keys Missing" };
+    return {
+      statusCode: 401,
+      body: "API Keys Missing"
+    };
   }
 
   // Construct the body of the request
-  const body = {
-    grant_type: "authorization_code",
-    code: params.code,
-    client_id: params.client_id,
-    client_secret: params.client_secret,
-    redirect_uri: params.redirect_uri
+
+  // const headers = {
+  //   "content-type": "application/json"
+  // };
+  // const data = {
+  //   grant_type: "authorization_code",
+  //   code: params.code,
+  //   client_id: params.client_id,
+  //   client_secret: params.client_secret,
+  //   redirect_uri: params.redirect_uri
+  // };
+  // const body = JSON.stringify(data);
+  // console.log("BODY", data, body);
+
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded"
   };
-  const jsonBody = JSON.stringify(body);
-  console.log("BODY", body, jsonBody);
+  const body = `grant_type="authorization_code"&client_id=${params.client_id}&client_secret=${params.client_secret}&code=${params.code}&redirect_uri=${params.redirect_uri}`;
+  console.log("BODY", body);
 
   // Request an access token from the oAuth API
   return fetch(mltshpOAuthApiUrl, {
     method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: jsonBody
+    headers: headers,
+    body: body
   })
     .then(response => response.json())
     .then(json => {
