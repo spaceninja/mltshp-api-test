@@ -9,8 +9,8 @@
  */
 
 // Your app's API key & secret
-const API_KEY = "YOUR_API_KEY";
-const API_SECRET = "YOUR_API_SECRET";
+const API_KEY = "KEY";
+const API_SECRET = "SECRET";
 
 // Redirect URL MLTSHP will send auth code to.
 // Same one you provided when you set up your app.
@@ -43,8 +43,14 @@ const getToken = () => {
     client_secret: API_SECRET
   };
 
+  // const headers = {
+  //   "Content-Type": "application/x-www-form-urlencoded"
+  // };
+  // const data = `client_id=${API_KEY}&client_secret=${API_SECRET}&code=${authCode}&redirect_uri=${REDIRECT_URL}`;
+
   return fetch(ACCESS_TOKEN_URL, {
     method: "POST",
+    // headers: headers,
     body: data
   }).then(response => response.json());
 };
