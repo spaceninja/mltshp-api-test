@@ -26,10 +26,11 @@ You'll need to set environment variables for your API key, secret, and redirect 
 
 ## Proxy Server
 
-Note that due to CORS restrictions, a JS app can't talk directly to the MLTSHP
-API. As a work-around, this app uses the [CORS Anywhere][1] demo server.
+Note that [due to CORS restrictions][1], a JS app can't talk directly to the
+MLTSHP API. As a work-around, this app uses the [CORS Anywhere][2] demo server.
 This is good enough for a quick demo like this, but is a terrible idea for a
 real app, since you're sending your API keys to it. If you want to build a real
 app, you'll need to set up your own proxy.
 
-[1]: https://github.com/Rob--W/cors-anywhere/
+[1]: https://stackoverflow.com/a/43268098
+[2]: https://github.com/Rob--W/cors-anywhere/
