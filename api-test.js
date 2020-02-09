@@ -19,6 +19,7 @@ const REDIRECT_URL = "https://example.com/api-test";
 // Other API URLs
 const AUTHENTICATION_URL = `https://mltshp.com/api/authorize?response_type=code&client_id=${API_KEY}`;
 const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
+const RESOURCE_URL = "https://mltshp.com";
 
 // Salt for your nonce
 const NONCE_SALT = "Something unique or random.";
@@ -35,6 +36,7 @@ const appElement = document.getElementById("app");
  * i.e. 0-255 -> '00'-'ff'
  *
  * @param {number} dec
+ * @returns {string}
  * @see https://stackoverflow.com/a/27747377
  */
 function dec2hex(dec) {
@@ -46,6 +48,7 @@ function dec2hex(dec) {
  * Returns a random string of the specified length
  *
  * @param {number} length
+ * @returns {string}
  * @see https://stackoverflow.com/a/27747377
  */
 function generateNonce(length = 40) {
@@ -65,13 +68,17 @@ function generateNonce(length = 40) {
  *  * The host (mltshp.com)
  *  * The port (443 for ssl)
  *  * The API endpoint path (/api/sharedfile/GA4)
- *  * The query array (There is no query array for this request,
+ *  * The query array
+ *    There is no query array for this request,
  *    but there will be an example on the developer site soon.
- *    There is a specific method for encoding this bit.)
+ *    There is a specific method for encoding this bit.
  *
  * @param {object} token
+ * @param {string} token.access_token
+ * @param {string} token.secret
  * @param {string} path
- * @param {string} method
+ * @param {string} method=GET
+ * @returns {string}
  */
 const generateSignature = (token, path, method = "GET") => {
   const timestamp = Math.floor(Date.now() / 1000);
@@ -82,7 +89,7 @@ const generateSignature = (token, path, method = "GET") => {
   // You should use https for all API queries
   const port = 80;
 
-  // Normalize the message. The order here is important!
+  // Normalize the message. The order and linebreaks are important!
   const normalizedString = `${token.access_token}
 ${timestamp}
 ${nonce}
@@ -102,14 +109,17 @@ ${path}
 };
 
 /**
- * Get Image
+ * Get API Resource
  *
  * @param {object} token
+ * @param {string} token.access_token
+ * @param {string} token.secret
  * @param {string} path
+ * @returns {object}
  */
-const getImage = (token, path) => {
+const getResource = (token, path) => {
   const authString = generateSignature(token, path);
-  const endpoint = `https://mltshp.com${path}`;
+  const endpoint = `${RESOURCE_URL}${path}`;
 
   return fetch(endpoint, {
     method: "GET",
@@ -128,6 +138,7 @@ const getImage = (token, path) => {
  * Get API Token
  *
  * @param {string} code
+ * @returns {object}
  */
 const getToken = code => {
   return fetch(ACCESS_TOKEN_URL, {
@@ -153,7 +164,7 @@ const init = async () => {
   console.log("TOKEN:", token);
 
   // And send it!
-  let image = await getImage(token, "/api/sharedfile/GA4");
+  let image = await getResource(token, "/api/sharedfile/GA4");
   console.log("IMAGE", image);
 
   // Output the array to page
