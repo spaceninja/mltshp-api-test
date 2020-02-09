@@ -58,7 +58,7 @@ const dec2hex = dec => {
  * Generate a Nonce
  * Returns a random string of the specified length
  *
- * @param {number} length
+ * @param {number} [length=40]
  * @returns {string}
  * @see https://stackoverflow.com/a/27747377
  */
@@ -102,7 +102,7 @@ const handleErrors = response => {
  * @param {string} token.access_token
  * @param {string} token.secret
  * @param {string} path
- * @param {string} method=GET
+ * @param {string} [method=GET]
  * @returns {string}
  */
 const generateAuthString = (token, path, method = "GET") => {
@@ -137,7 +137,7 @@ ${path}
     `nonce=${nonce}, ` +
     `signature=${signature}`;
 
-  console.group("GENERATE SIGNATURE");
+  console.group("GENERATE AUTH STRING");
   console.log(normalizedString);
   console.log(authString);
   console.groupEnd();
