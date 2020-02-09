@@ -3,12 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "netlify-lambda build src/lambda"
+    "dev": "parcel *.html",
+    "build": "parcel build *.html"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  },
   "dependencies": {
+    "core-js": "^3.6.4",
+    "crypto-js": "^3.1.9-1",
     "encoding": "^0.1.12",
     "netlify-lambda": "^1.6.3",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "regenerator-runtime": "^0.13.3"
   }
 }

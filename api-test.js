@@ -1,3 +1,8 @@
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+import hmacSHA1 from "crypto-js/hmac-sha1";
+import base64 from "crypto-js/enc-base64";
+
 /**
  * MLTSHP API Test - PHP
  *
@@ -6,23 +11,29 @@
  *
  * Start by setting up an app to get an API key & secret at
  * https://mltshp.com/developers
+ *
+ * TODO: convert to simple Node app
+ *  x load secrets from environment vars
+ *  x provide a simple server
+ *  x update default redirect URL and instructions to use it
+ *  - break app into three routes - index (logged out), login, image
+ *  - ditch proxy functions if node app can connect to API
+ *  - update dev docs with how to construct signature
+ *  - update dev docs to link to repo
  */
 
-// Your app's API key & secret
-const API_KEY = "YOUR_API_KEY";
-const API_SECRET = "YOUR_API_SECRET";
-
-// Redirect URL MLTSHP will send auth code to.
-// Same one you provided when you set up your app.
-const REDIRECT_URL = "https://example.com/api-test";
+// Your app's API key, secret, and redirect URL
+const API_KEY = process.env.API_KEY;
+const API_SECRET = process.env.API_SECRET;
+const REDIRECT_URL = process.env.REDIRECT_URL;
+console.log("ENV VARS", API_KEY, API_SECRET, REDIRECT_URL);
 
 // Other API URLs
 const AUTHENTICATION_URL = `https://mltshp.com/api/authorize?response_type=code&client_id=${API_KEY}`;
 const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
+// const ACCESS_TOKEN_URL =
+//   "https://mltshp-api-test.netlify.com/.netlify/functions/mltshp-oauth-api-proxy";
 const RESOURCE_URL = "https://mltshp.com";
-
-// Salt for your nonce
-const NONCE_SALT = "Something unique or random.";
 
 // Get the authorization code from the URL parameter
 const urlParams = new URLSearchParams(window.location.search);
@@ -100,8 +111,8 @@ ${path}
 `;
   console.log("NORMALIZED STRING", normalizedString);
 
-  const digest = ""; // hmac(token.secret, sha1) or hmac(secret, nomalizedString, sha1).digest()
-  const signature = ""; // hexToBase64(hmac-->hash(normalizedString)) or base64(digest)
+  const hash = hmacSHA1(normalizedString, token.secret);
+  const signature = base64.stringify(hash);
   const authString = `MAC token=${token.access_token}, timestamp=${timestamp}, nonce=${nonce}, signature=${signature}`;
   console.log("SIGNATURE", authString);
 
@@ -124,6 +135,7 @@ const getResource = (token, path) => {
   return fetch(endpoint, {
     method: "GET",
     headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
       Authorization: authString
     }
   })
