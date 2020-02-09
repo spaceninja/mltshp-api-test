@@ -23,16 +23,12 @@ const ACCESS_TOKEN_URL = "https://mltshp.com/api/token";
 // Salt for your nonce
 const NONCE_SALT = "Something unique or random.";
 
-// The resource we're going to get info on via the sharedfile API endpoint
-const RESOURCE_URL = "https://mltshp.com/api/sharedfile/GA4";
-
 // Get the authorization code from the URL parameter
 const urlParams = new URLSearchParams(window.location.search);
 const authCode = urlParams.get("code");
 
 // Prepare the document for content
 const appElement = document.getElementById("app");
-let content = "";
 
 /**
  * Convert Decimal to Hex
@@ -46,15 +42,16 @@ function dec2hex(dec) {
 }
 
 /**
- * Generate a Random String of Specified Length
+ * Generate a Nonce
+ * Returns a random string of the specified length
  *
- * @param {number} len
+ * @param {number} length
  * @see https://stackoverflow.com/a/27747377
  */
-function generateId(len = 40) {
-  var arr = new Uint8Array(len / 2);
-  window.crypto.getRandomValues(arr);
-  return Array.from(arr, dec2hex).join("");
+function generateNonce(length = 40) {
+  var array = new Uint8Array(length / 2);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, dec2hex).join("");
 }
 
 /**
@@ -63,40 +60,68 @@ function generateId(len = 40) {
  *  * The access token you just received.
  *  * A UTC timestamp
  *  * A nonce: a random string between 10 and 35 characters long.
- *    Don't use the UTC timestamp as a nonce!
+ *    Note: Don't use the UTC timestamp as a nonce!
  *  * Your request method (GET/POST)
  *  * The host (mltshp.com)
  *  * The port (443 for ssl)
- *  * The path (/api/sharedfile/GA4)
- *    Replace with the specific method and resource you want to use.
+ *  * The API endpoint path (/api/sharedfile/GA4)
  *  * The query array (There is no query array for this request,
  *    but there will be an example on the developer site soon.
  *    There is a specific method for encoding this bit.)
  *
- * @param {string} token
+ * @param {object} token
+ * @param {string} path
+ * @param {string} method
  */
-const generateSignature = token => {
+const generateSignature = (token, path, method = "GET") => {
   const timestamp = Math.floor(Date.now() / 1000);
-  const nonce = generateId(35);
+  const nonce = generateNonce(35);
 
   // NOTE: using port 80 is a bug!
-  // Port should be 443 but it's not recognizing it, so leave as 80 for now
+  // Port should be 443 but it's not recognizing it
   // You should use https for all API queries
-  const normalizedString = `${token}
+  const port = 80;
+
+  // Normalize the message. The order here is important!
+  const normalizedString = `${token.access_token}
 ${timestamp}
 ${nonce}
-GET
+${method}
 mltshp.com
-80
-/api/sharedfile/GA4
+${port}
+${path}
 `;
   console.log("NORMALIZED STRING", normalizedString);
 
-  const digest = ""; // hmac(secret, sha1) or hmac(secret, nomalizedString, sha1).digest()
+  const digest = ""; // hmac(token.secret, sha1) or hmac(secret, nomalizedString, sha1).digest()
   const signature = ""; // hexToBase64(hmac-->hash(normalizedString)) or base64(digest)
-  const authString = `MAC token=${token}, timestamp=${timestamp}, nonce=${nonce}, signature=${signature}`;
+  const authString = `MAC token=${token.access_token}, timestamp=${timestamp}, nonce=${nonce}, signature=${signature}`;
+  console.log("SIGNATURE", authString);
 
   return authString;
+};
+
+/**
+ * Get Image
+ *
+ * @param {object} token
+ * @param {string} path
+ */
+const getImage = (token, path) => {
+  const authString = generateSignature(token, path);
+  const endpoint = `https://mltshp.com${path}`;
+
+  return fetch(endpoint, {
+    method: "GET",
+    headers: {
+      Authorization: authString
+    }
+  })
+    .then(response => response.json())
+    .catch(error => ({
+      statusCode: 422,
+      body: `Oops! Something went wrong. ${error}`
+    }));
 };
 
 /**
@@ -120,25 +145,6 @@ const getToken = code => {
 };
 
 /**
- * Get Image
- *
- * @param {string} authString
- */
-const getImage = authString => {
-  return fetch(RESOURCE_URL, {
-    method: "GET",
-    headers: {
-      Authorization: authString
-    }
-  })
-    .then(response => response.json())
-    .catch(error => ({
-      statusCode: 422,
-      body: `Oops! Something went wrong. ${error}`
-    }));
-};
-
-/**
  * Init Function
  */
 const init = async () => {
@@ -146,13 +152,12 @@ const init = async () => {
   let token = await getToken(authCode);
   console.log("TOKEN:", token);
 
-  // Now sign the request
-  const signature = generateSignature(token.access_token);
-  console.log("SIGNATURE", signature);
-
   // And send it!
-  let image = await getImage(signature);
+  let image = await getImage(token, "/api/sharedfile/GA4");
   console.log("IMAGE", image);
+
+  // Output the array to page
+  appElement.innerHTML = `<pre>${JSON.stringify(image, undefined, 2)}</pre>`;
 };
 
 // See if we received an authorization code as a URL parameter
@@ -161,11 +166,9 @@ if (authCode) {
   init();
 } else {
   // Auth code does not exist. Put info in the html to send them on their way.
-  content = `
+  appElement.innerHTML = `
     You need to authenticate this application with MLTSHP first.
     <a href="${AUTHENTICATION_URL}">Go authenticate</a>.
     (Be sure to click "I AGREE.")
   `;
 }
-
-appElement.innerHTML = content;
