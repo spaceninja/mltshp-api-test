@@ -127,7 +127,7 @@ ${path}
 `;
 
   // Create a signature by taking the normalizedString and use the secret to
-  // construct a has using SHA1 encoding, then Base64 the result.
+  // construct a hash using SHA1 encoding, then Base64 the result.
   const hash = hmacSHA1(normalizedString, token.secret);
   const signature = base64.stringify(hash);
 
